@@ -118,6 +118,7 @@ h2 { font-size: 19px; line-height: 1.2; font-weight: 700; letter-spacing: -.035e
 .transaction-icon.green { color: #19864c; background: #daf3e4; }
 .transaction-icon.gray { color: #68707a; background: #e7e9ec; }
 .transaction-copy { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.transaction-year { color: #8b9097; font-size: 9px; line-height: 1; font-weight: 700; letter-spacing: .02em; }
 .transaction-title { font-size: 11px; line-height: 1.28; font-weight: 500; }
 .transaction-subtitle { color: var(--muted); font-size: 10px; line-height: 1.2; }
 .transaction-amount { max-width: 95px; padding-top: 1px; font-size: 11px; font-weight: 600; text-align: right; white-space: nowrap; }

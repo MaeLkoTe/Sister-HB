@@ -55,7 +55,7 @@
     document.getElementById("transactions").innerHTML = config.transactions.map(transaction => `
       <button class="transaction-row" type="button" data-action="transaction" data-id="${escapeHtml(transaction.id)}" aria-label="Открыть чек: ${escapeHtml(transaction.title)}">
         <span class="transaction-icon ${escapeHtml(transaction.tone)}">${icons[transaction.icon] || ""}</span>
-        <span class="transaction-copy"><span class="transaction-title">${escapeHtml(transaction.title)}</span>${transaction.subtitle ? `<span class="transaction-subtitle">${escapeHtml(transaction.subtitle)}</span>` : ""}</span>
+        <span class="transaction-copy">${transaction.year ? `<span class="transaction-year">${escapeHtml(transaction.year)} год</span>` : ""}<span class="transaction-title">${escapeHtml(transaction.title)}</span>${transaction.subtitle ? `<span class="transaction-subtitle">${escapeHtml(transaction.subtitle)}</span>` : ""}</span>
         <span class="transaction-amount${transaction.tone === "green" ? " green-text" : ""}">${escapeHtml(transaction.amount || "")}</span>
       </button>`).join("");
   }
@@ -192,7 +192,7 @@
 
   function receipt(transaction) {
     const lines = transaction.receipt.map(line => `<p>${escapeHtml(line)}</p>`).join("");
-    openModal("Чек по операции", `<div class="receipt-status"><span class="receipt-dot"></span>${transaction.id === "surprise" ? "В обработке" : "Исполнено"}</div><div class="modal-highlight"><strong>${escapeHtml(transaction.title)}</strong>${transaction.amount ? `<br />Сумма: ${escapeHtml(transaction.amount)}` : ""}</div>${lines}`);
+    openModal("Чек по операции", `<div class="receipt-status"><span class="receipt-dot"></span>${transaction.id === "surprise" ? "В обработке" : "Исполнено"}</div><div class="modal-highlight"><strong>${transaction.year ? `${escapeHtml(transaction.year)} год · ` : ""}${escapeHtml(transaction.title)}</strong>${transaction.amount ? `<br />Сумма: ${escapeHtml(transaction.amount)}` : ""}</div>${lines}`);
   }
 
   document.addEventListener("click", event => {
