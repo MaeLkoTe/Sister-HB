@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#202126" />
+    <meta name="description" content="Семейный банк — поздравление для самой любимой сестрёнки." />
+    <title>Семейный банк — с днём рождения!</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="data.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand" aria-label="Семейный банк">
+          <span class="brand-mark" aria-hidden="true">А</span>
+          <span class="brand-name">СЕМЕЙНЫЙ<br />БАНК</span>
+        </div>
+        <button class="icon-button notification-button" type="button" aria-label="Уведомления" data-action="notification">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" /></svg>
+          <span class="notification-dot" aria-hidden="true"></span>
+        </button>
+      </header>
+
+      <main class="app-content">
+        <section class="welcome-section" aria-labelledby="welcome-title">
+          <div class="welcome-row">
+            <h1 id="welcome-title"></h1>
+            <div class="avatar" id="avatar" aria-label="Фото именинницы"></div>
+          </div>
+          <div class="stories" id="stories" aria-label="Поздравительные истории"></div>
+        </section>
+
+        <section class="panel accounts-panel" aria-labelledby="accounts-title">
+          <h2 id="accounts-title">Карты и счета</h2>
+          <button class="bank-card" type="button" data-action="card" aria-label="Карта Sister Platinum">
+            <div class="bank-card-heading">
+              <span class="card-brand-mark" aria-hidden="true">А</span>
+              <span class="card-name">Sister Platinum</span>
+              <span class="card-number">• 2003</span>
+            </div>
+            <span class="card-balance">23 000 000 <span aria-hidden="true">♡</span></span>
+            <span class="card-caption">Безусловная любовь</span>
+            <span class="card-glow" aria-hidden="true"></span>
+          </button>
+          <div class="account-list" id="account-list"></div>
+        </section>
+
+        <section class="quick-section" aria-labelledby="quick-title">
+          <h2 id="quick-title">Быстрые действия</h2>
+          <div class="quick-grid" id="quick-actions"></div>
+        </section>
+
+        <section class="panel transactions-panel" aria-labelledby="transactions-title">
+          <h2 id="transactions-title">История операций</h2>
+          <div class="transaction-list" id="transactions"></div>
+        </section>
+
+        <div class="bottom-space" aria-hidden="true"></div>
+      </main>
+    </div>
+
+    <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+    <div class="modal-root" id="modal-root"></div>
+    <div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
+  </body>
+</html>
