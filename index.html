@@ -34,15 +34,23 @@
 
         <section class="panel accounts-panel" aria-labelledby="accounts-title">
           <h2 id="accounts-title">Карты и счета</h2>
-          <button class="bank-card" type="button" data-action="card" aria-label="Карта Sister Platinum">
-            <div class="bank-card-heading">
+          <button class="bank-card" type="button" data-action="card" aria-label="Карта Sister Platinum. Нажми, чтобы перевернуть" aria-pressed="false">
+            <span class="card-inner">
+            <span class="card-face card-front">
+            <span class="bank-card-heading">
               <span class="card-brand-mark" aria-hidden="true">А</span>
               <span class="card-name">Sister Platinum</span>
               <span class="card-number">• 2003</span>
-            </div>
+            </span>
             <span class="card-balance">23 000 000 <span aria-hidden="true">♡</span></span>
             <span class="card-caption">Безусловная любовь</span>
             <span class="card-glow" aria-hidden="true"></span>
+            </span>
+            <span class="card-face card-back" aria-hidden="true">
+              <span class="card-heart" aria-hidden="true">♡</span>
+              <span class="card-message" id="card-message"></span>
+            </span>
+            </span>
           </button>
           <div class="account-list" id="account-list"></div>
         </section>

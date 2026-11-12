@@ -26,6 +26,7 @@
   const escapeHtml = (value = "") => String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
 
   function render() {
+    document.getElementById("card-message").textContent = config.cardMessage;
     document.getElementById("welcome-title").innerHTML = `Привет, ${escapeHtml(config.sisterName)}! <span aria-label="сердце">❤️</span>`;
     const avatar = document.getElementById("avatar");
     avatar.innerHTML = config.avatarImage
@@ -200,7 +201,13 @@
     if (!control) return;
     const action = control.dataset.action;
     if (action === "notification") showToast(config.notification);
-    if (action === "card") showToast("Карта активна. Срок действия: бессрочно");
+    if (action === "card") {
+      const flipped = control.classList.toggle("is-flipped");
+      control.setAttribute("aria-pressed", String(flipped));
+      control.setAttribute("aria-label", flipped ? `${config.cardMessage} Нажми, чтобы вернуть карту` : "Карта Sister Platinum. Нажми, чтобы перевернуть");
+      control.querySelector(".card-front").setAttribute("aria-hidden", String(flipped));
+      control.querySelector(".card-back").setAttribute("aria-hidden", String(!flipped));
+    }
     if (action === "story") openStory(Number(control.dataset.index));
     if (action === "close-story") closeStory();
     if (action === "story-next") advanceStory(1);
