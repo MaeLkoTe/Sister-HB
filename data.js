@@ -42,7 +42,6 @@ window.SISTER_BANK_CONFIG = {
   actions: [
     { id: "gift", title: "Получить подарок", icon: "gift", kind: "accent" },
     { id: "sbp", title: "СБП", subtitle: "Семейные Быстрые Поздравления", icon: "sparkles" },
-    { id: "chaos", title: "Заказать суету", icon: "phone" },
     { id: "wheel", title: "Барабан суперкэшбэка на Маркетплейсы", icon: "percent" }
   ],
   compliments: [
@@ -58,7 +57,6 @@ window.SISTER_BANK_CONFIG = {
     riddle: "Загадка: где собирается вся семья, когда у именинницы день рождения? Иди туда — и скажи кодовую фразу: «Мой семейный банк одобрил выдачу!»",
     note: "Покажи это окно маме, папе или братцам, чтобы обменять сертификат на сюрприз."
   },
-  chaosMessage: "Заявка на суету принята! Ожидайте звонка от брата в ближайшее время.",
   transactions: [
     {
       id: "arrival",

@@ -208,7 +208,6 @@
     if (action === "account") openAccount(control.dataset.id);
     if (action === "gift") openGift();
     if (action === "sbp") openSbp();
-    if (action === "chaos") openModal("Заявка на суету", `<p>${escapeHtml(config.chaosMessage)}</p><div class="modal-highlight">Приоритет заявки: праздничный 🎂</div>`);
     if (action === "wheel") openWheel();
     if (action === "transaction") {
       const transaction = config.transactions.find(item => item.id === control.dataset.id);

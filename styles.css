@@ -98,7 +98,7 @@ h2 { font-size: 19px; line-height: 1.2; font-weight: 700; letter-spacing: -.035e
 
 .quick-section { margin: 0 0 21px; }
 .quick-section h2 { margin: 0 0 9px 1px; }
-.quick-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.quick-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .quick-action { min-width: 0; min-height: 94px; padding: 9px 5px 8px; border: 0; border-radius: 15px; background: #fff; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; cursor: pointer; transition: transform .16s ease, box-shadow .16s ease; }
 .quick-action:active { transform: translateY(2px) scale(.98); }
 .quick-action.accent { color: #fff; background: linear-gradient(150deg, #f23a2f, #de1e25); box-shadow: 0 5px 12px rgba(221, 35, 37, .25); }
