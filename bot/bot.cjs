@@ -28,6 +28,10 @@ function loadConfig() {
   if (typeof config.buttonText !== 'string' || !config.buttonText.trim()) {
     throw new Error('Заполните buttonText.');
   }
+  config.recipientChatId = String(config.recipientChatId ?? '').trim();
+  if (config.recipientChatId && (!/^[1-9]\d*$/.test(config.recipientChatId) || !Number.isSafeInteger(Number(config.recipientChatId)))) {
+    throw new Error('recipientChatId должен содержать числовой Telegram ID пользователя.');
+  }
   return config;
 }
 
@@ -45,18 +49,22 @@ function createApi(token, signal) {
   };
 }
 
+async function sendInvitation(chatId, api, config) {
+  return api('sendMessage', {
+    chat_id: chatId,
+    text: config.message,
+    link_preview_options: { is_disabled: true },
+    reply_markup: { inline_keyboard: [[{ text: config.buttonText, url: config.siteUrl }]] }
+  });
+}
+
 async function handleUpdate(update, api, config) {
   const message = update.message;
   if (message?.chat?.type !== 'private' || typeof message.text !== 'string') return;
   // Принимаем /start, /start с параметром и команды с @именем_бота.
   const command = message.text.trim().split(/\s/)[0].split('@')[0];
   if (command !== '/start' && command !== '/help') return;
-  await api('sendMessage', {
-    chat_id: message.chat.id,
-    text: config.message,
-    link_preview_options: { is_disabled: true },
-    reply_markup: { inline_keyboard: [[{ text: config.buttonText, url: config.siteUrl }]] }
-  });
+  await sendInvitation(message.chat.id, api, config);
 }
 
 async function main() {
@@ -65,6 +73,11 @@ async function main() {
   process.once('SIGINT', () => shutdown.abort());
   process.once('SIGTERM', () => shutdown.abort());
   const api = createApi(config.token, shutdown.signal);
+  if (config.recipientChatId) {
+    await sendInvitation(config.recipientChatId, api, config);
+    console.log('Приглашение отправлено. Бот завершил работу. Повторный запуск отправит его ещё раз.');
+    return;
+  }
   const me = await api('getMe');
   const webhook = await api('getWebhookInfo');
   if (webhook.url) throw new Error('У бота настроен webhook. Используйте нового бота или отключите прежнюю интеграцию.');
@@ -104,7 +117,13 @@ async function main() {
 if (require.main === module) {
   main().catch(error => {
     if (error instanceof TelegramError) {
-      console.error(`Ошибка Telegram ${error.code}. Проверьте токен и убедитесь, что запущена только одна копия бота.`);
+      if (error.code === 403) {
+        console.error('Telegram запретил отправку. Сестра должна заранее нажать «Старт» у этого бота и не блокировать его.');
+      } else if (error.code === 400) {
+        console.error('Telegram отклонил запрос. Проверьте числовой recipientChatId и текст; получатель должен заранее открыть бота и нажать «Старт».');
+      } else {
+        console.error(`Ошибка Telegram ${error.code}. Проверьте токен и убедитесь, что запущена только одна копия бота. При лимите отправки повторите запуск позже.`);
+      }
     } else {
       console.error('Не удалось запустить бота. Проверьте конфиг, интернет и отсутствие webhook.');
     }
@@ -112,4 +131,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { loadConfig, createApi, handleUpdate };
+module.exports = { loadConfig, createApi, handleUpdate, sendInvitation };
