@@ -1,0 +1,6 @@
+bot/config.local.json
+bot/.state-*.json
+.env
+.env.*
+!.env.example
+node_modules/
