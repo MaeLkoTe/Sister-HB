@@ -166,7 +166,7 @@
 
   function openGift() {
     launchConfetti();
-    openModal(config.gift.title, `<div class="certificate"><div class="certificate-stamp">🎁</div><strong>Подарок одобрен семейным банком</strong><p>${escapeHtml(config.gift.message)}</p></div><div class="modal-highlight"><strong>Подсказка к выдаче:</strong><br />${escapeHtml(config.gift.riddle)}</div><p style="margin-top:11px">${escapeHtml(config.gift.note)}</p>`);
+    openModal(config.gift.title, `<div class="certificate"><div class="certificate-stamp">🎁</div><strong>Подарок одобрен семейным банком</strong><p>${escapeHtml(config.gift.message)}</p></div><p style="margin-top:11px">${escapeHtml(config.gift.note)}</p>`);
   }
 
   function openSbp() {
