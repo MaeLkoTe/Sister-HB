@@ -11,6 +11,8 @@ class TelegramError extends Error {
   }
 }
 
+class ConnectionError extends Error {}
+
 function loadConfig() {
   const localPath = path.join(__dirname, 'config.local.json');
   const defaults = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.example.json'), 'utf8'));
@@ -37,15 +39,34 @@ function loadConfig() {
 
 function createApi(token, signal) {
   return async (method, params = {}) => {
-    const response = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params),
-      signal: AbortSignal.any([signal, AbortSignal.timeout(45000)])
-    });
-    const body = await response.json();
-    if (!body.ok) throw new TelegramError(body.error_code || response.status, body.parameters?.retry_after);
-    return body.result;
+    // Повторяем только безопасные запросы чтения, но не sendMessage.
+    const attempts = ['getMe', 'getChat', 'getWebhookInfo', 'getUpdates'].includes(method) ? 3 : 1;
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      try {
+        const response = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(params),
+          signal: AbortSignal.any([signal, AbortSignal.timeout(method === 'getUpdates' ? 45000 : 15000)])
+        });
+        // При сбое шлюз может вернуть HTML вместо JSON.
+        if (response.status >= 500) throw new TelegramError(response.status);
+        let body;
+        try { body = await response.json(); }
+        catch { throw new ConnectionError('Telegram вернул некорректный ответ.'); }
+        if (!body.ok) throw new TelegramError(body.error_code || response.status, body.parameters?.retry_after);
+        return body.result;
+      } catch (error) {
+        if (signal.aborted) throw error;
+        const transient = !(error instanceof TelegramError) || error.code >= 500;
+        if (!transient || attempt === attempts) {
+          // Не сохраняем исходный URL ошибки: он содержит токен.
+          throw error instanceof TelegramError ? error : new ConnectionError('Не удалось связаться с Telegram.');
+        }
+        console.error(`Временный сбой Telegram. Повтор проверки ${attempt + 1}/${attempts}…`);
+        await sleep(attempt * 1000, undefined, { signal });
+      }
+    }
   };
 }
 
@@ -73,7 +94,18 @@ async function main() {
   process.once('SIGINT', () => shutdown.abort());
   process.once('SIGTERM', () => shutdown.abort());
   const api = createApi(config.token, shutdown.signal);
+  if (process.argv.includes('--check')) {
+    await api('getMe');
+    console.log('Подключение к Telegram и токен работают.');
+    if (config.recipientChatId) {
+      await api('getChat', { chat_id: config.recipientChatId });
+      console.log('Чат получателя найден. Это не гарантирует, что получатель не заблокировал бота.');
+    }
+    console.log('Проверка завершена. Сообщения не отправлялись.');
+    return;
+  }
   if (config.recipientChatId) {
+    await api('getMe');
     await sendInvitation(config.recipientChatId, api, config);
     console.log('Приглашение отправлено. Бот завершил работу. Повторный запуск отправит его ещё раз.');
     return;
@@ -105,6 +137,9 @@ async function main() {
     } catch (error) {
       if (shutdown.signal.aborted) break;
       if (error instanceof TelegramError && [400, 401, 404, 409].includes(error.code)) throw error;
+      // Отправка могла пройти даже при обрыве ответа. Не переотправляем
+      // приглашение автоматически при повторной обработке этого обновления.
+      if (error instanceof ConnectionError || (error instanceof TelegramError && error.code >= 500)) throw error;
       if (error.code && !(error instanceof TelegramError)) throw error;
       // Не печатаем исходные сетевые ошибки: они могут содержать URL с токеном.
       console.error('Временная ошибка связи или лимит Telegram. Повторяем запрос.');
@@ -121,9 +156,17 @@ if (require.main === module) {
         console.error('Telegram запретил отправку. Сестра должна заранее нажать «Старт» у этого бота и не блокировать его.');
       } else if (error.code === 400) {
         console.error('Telegram отклонил запрос. Проверьте числовой recipientChatId и текст; получатель должен заранее открыть бота и нажать «Старт».');
+      } else if (error.code >= 500) {
+        console.error(`Telegram или сетевой шлюз вернул ${error.code}. Это серверный сбой, он не означает, что токен неверный.`);
+        console.error('Если запускали отправку, сначала проверьте чат сестры: сообщение могло дойти. Автоматического повтора отправки не было. Проверка без отправки: node bot/bot.cjs --check');
+      } else if (error.code === 401) {
+        console.error('Telegram отклонил токен (401). Проверьте его в локальном конфиге или переменной окружения.');
       } else {
         console.error(`Ошибка Telegram ${error.code}. Проверьте токен и убедитесь, что запущена только одна копия бота. При лимите отправки повторите запуск позже.`);
       }
+    } else if (error instanceof ConnectionError) {
+      console.error('Не удалось получить ответ Telegram. Проверьте интернет, VPN или прокси.');
+      console.error('Если запускали отправку, проверьте чат перед повторным запуском. Диагностика без отправки: node bot/bot.cjs --check');
     } else {
       console.error('Не удалось запустить бота. Проверьте конфиг, интернет и отсутствие webhook.');
     }
